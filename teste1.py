@@ -10,7 +10,7 @@ def data_load(arquivo):
 
     try:
         with open(arquivo, 'r') as f:
-            linhas = f.readlines()
+            linhas = f.readlines() #linhas é uma lista onde cada linha é um elemento na lista, sendo uma lista de strings
 
             #a primeira linha é processada para escala
             escala = re.search(r'\[(\d+)\]', linhas[0])
@@ -24,21 +24,37 @@ def data_load(arquivo):
                 linha = linhas[i].strip()
                 if not linha: continue # serve para ignorar linhas vazias
 
-                coordenadas_pessoas = re.findall(r'\((\d+), (\d+), (\d+)\)', linha)
+                #da esquerda para a direita, separa a string no primeiro espaço em branco que encontrar
+                partes = linha.split(maxsplit=1)
 
-                caminho = []
-                for coord in coordenadas_pessoas:
-                    x = int (coord[0])
-                    y = int (coord[1])
-                    caminho.append ((x, y))
+                if len(partes) == 2: #verifica se dividiu em 2
+                    contagem_str, string_coordenadas = partes #divide as partes em duas diferentes variáveis
+                    contagem_declarada = int(contagem_str) # converte a contagem de string pra INT
+                    #re.findall encontra todas as ocorrencias de (x,y,f) na string e
+                    #retorna uma lista de tuplas
+                    coordenadas_encontradas = re.findall(r'\((\d+),(\d+),(\d+)\)', string_coordenadas)
+                    #cria uma lista para guardar o caminho final dessa pessoa
+                    caminho = []
 
-                if caminho: #Só incrmenta se achou alguma coordenada
-                    pontos_por_pessoa[id_pessoa_atual] = caminho
-                    id_pessoa_atual += 1
+                    #itera sobre cada dupla de cordenada encontrada
+                    for coord in coordenadas_encontradas:
+                         #converter para int
+                         x = int(coord[0])
+                         y = int(coord[1])
+                         caminho.append((x,y)) #bota a tupla x,y na lista caminho
+
+                    if len(caminho) != contagem_declarada:
+                         print (f"ERRO: Pessoa {id_pessoa_atual} - Contagem declarada: {contagem_declarada}, mas encontradas {len(caminho)} coordenadas.")
+
+                    if caminho:
+                         pontos_por_pessoa[id_pessoa_atual] = caminho
+                         id_pessoa_atual += 1
 
     except FileNotFoundError:
             print(f"Erro: O arquivo: '{arquivo}' não encontrado.")
             return None, None
+    #retorna os dados lidos e processados se tudo occorreu bem
+    return pontos_por_pessoa, pixels_por_metro
 
 def desenhar ():
     #função de callback - sera chamada toda vez que o frame for redesenhado
@@ -50,14 +66,29 @@ def main():
     glutInit() #Inicializa o glut
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE) # sis. de cores RGBA / buffer duplo
 
-    glutInitWindowSize(800, 600) # tamanho inicial da janela
+    glutInitWindowSize(1280, 720) # tamanho inicial da janela
     glutInitWindowPosition(100, 100) # onde a janela vai aparece na tela
 
-    window_id = glutCreateWindow("Trabalho CG")
+    window_id = glutCreateWindow("Trabalho de CG - Vicente Hofmeister")
 
-    glutDisplayFunc(desenhar) # regisrta a função de callback de desenho
+    #CARREGMENTO DOS DADOS
+    dados_globais, escala_global = data_load('Paths_D.txt')
 
-    print("Janela GLUT criada.")
+    if dados_globais is None:
+        return #encerra o programa se der problema
+    
+    #----------------area de debug no terminal-----------------
+
+    print("-----------Dados do Paths_D.txt")
+    print(f"Escala: {escala_global} p por metro")
+    print(f"Caminhos encontrados: {len(dados_globais)}")
+    for id_pessoa, trajetoria in dados_globais.items():
+         print(f" Pessoa {id_pessoa}: {len(trajetoria)} pontos encontrados.")
+    print("--------------------------")
+
+    glutDisplayFunc(desenhar)
+    print("Janela glut criada")
+
     glutMainLoop()
 
 
