@@ -3,7 +3,13 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 import re
 
-def data_load(arquivo):
+#Variáveis globais
+dados_globais = {}
+escala_global = 1
+largura_window, altura_window = 1280, 720
+
+
+def data_load(arquivo, largura, altura):
     #vai ler os dados do Paths_D.txt linha por linha
     pontos_por_pessoa = {}
     pixels_por_metro = {}
@@ -33,46 +39,67 @@ def data_load(arquivo):
                     #re.findall encontra todas as ocorrencias de (x,y,f) na string e
                     #retorna uma lista de tuplas
                     coordenadas_encontradas = re.findall(r'\((\d+),(\d+),(\d+)\)', string_coordenadas)
+
                     #cria uma lista para guardar o caminho final dessa pessoa
                     caminho = []
-
                     #itera sobre cada dupla de cordenada encontrada
                     for coord in coordenadas_encontradas:
                          #converter para int
                          x = int(coord[0])
                          y = int(coord[1])
-                         caminho.append((x,y)) #bota a tupla x,y na lista caminho
+
+                         x_normalizado = (x / largura) * 2 - 1
+                         y_normalizado = 1 - (y / altura) * 2
+
+                         caminho.append((x_normalizado,y_normalizado)) #bota a tupla x,y na lista caminho
 
                     if len(caminho) != contagem_declarada:
-                         print (f"ERRO: Pessoa {id_pessoa_atual} - Contagem declarada: {contagem_declarada}, mas encontradas {len(caminho)} coordenadas.")
+                         print (f"ERRO: Número diferente de pessoas declaradas e encontradas: "
+                                f"Encontradas: {len(caminho)}"
+                                f"Declarada: {contagem_declarada}"
+                                f"Pessoa(s): {id_pessoa_atual} ")
 
                     if caminho:
                          pontos_por_pessoa[id_pessoa_atual] = caminho
                          id_pessoa_atual += 1
 
     except FileNotFoundError:
-            print(f"Erro: O arquivo: '{arquivo}' não encontrado.")
+            print(f"Erro: Erro ao encontrar o arquivo: {arquivo}.")
             return None, None
     #retorna os dados lidos e processados se tudo occorreu bem
     return pontos_por_pessoa, pixels_por_metro
 
 def desenhar ():
     #função de callback - sera chamada toda vez que o frame for redesenhado
+        glClearColor(0.1, 0.1, 0.1, 1)
         glClear(GL_COLOR_BUFFER_BIT) #mesmo sendo 2d, é boa prática limpar o buffer 3d
+        glPointSize(11)
+
+        glBegin(GL_POINTS)
+        for trajetoria in dados_globais.values():
+            if trajetoria:
+                pos_inicial = trajetoria[0]
+                glColor3f(0.1, 1, 0.1)
+                glVertex2f(pos_inicial[0], pos_inicial[1])
+        glEnd()
+
         #futuramente encaixar o codigo das coordenadas
         glutSwapBuffers()
 
 def main():
+
+    global dados_globais, escala_global
+
     glutInit() #Inicializa o glut
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE) # sis. de cores RGBA / buffer duplo
 
-    glutInitWindowSize(1280, 720) # tamanho inicial da janela
+    glutInitWindowSize(largura_window, altura_window) # tamanho inicial da janela
     glutInitWindowPosition(100, 100) # onde a janela vai aparece na tela
 
     window_id = glutCreateWindow("Trabalho de CG - Vicente Hofmeister")
 
     #CARREGMENTO DOS DADOS
-    dados_globais, escala_global = data_load('Paths_D.txt')
+    dados_globais, escala_global = data_load('Paths_D.txt', largura_window, altura_window)
 
     if dados_globais is None:
         return #encerra o programa se der problema
