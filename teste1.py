@@ -124,7 +124,7 @@ def desenhar ():
             glVertex2f(ponto['pos_atual'][0], ponto['pos_atual'][1])
 
         #desenha jogador
-        glColor3f(1, 0.1, 0.1)
+        glColor3f(0.1, 0.1, 1)
         glVertex2f(pos_jogador[0], pos_jogador[1])
 
         glEnd()
@@ -191,7 +191,7 @@ def main():
         #cria um dic pra cada ponto
         novo_ponto = {
             'trajetoria': trajetoria,
-            'pos_atual': trajetoria[0] if trajetoria else (0.0, 0.0),
+            'pos_atual': trajetoria[0],
             'esta_perto': False
         }
         dados_globais.append(novo_ponto)
