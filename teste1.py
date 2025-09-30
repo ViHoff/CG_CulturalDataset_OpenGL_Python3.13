@@ -20,9 +20,6 @@ velocidade_personagem = 0.02
 teclas_ativadas = set()
 
 
-
-
-
 def data_load(arquivo, largura, altura):
     #vai ler os dados do Paths_D.txt linha por linha
     pontos_por_pessoa = {}
@@ -102,7 +99,6 @@ def testar_proximidade():
                 ponto_1['esta_perto'] = True
                 ponto_2['esta_perto'] = True
 
-
     #calcula a distancia com o usuário
     for ponto in dados_globais:
         dist = math.hypot(ponto['pos_atual'][0] - pos_jogador[0],
@@ -110,16 +106,12 @@ def testar_proximidade():
         if dist < proximidade:
             ponto['esta_perto'] = True
 
-
-
-
 def desenhar ():
     #função de callback - sera chamada toda vez que o frame for redesenhado
 
         testar_proximidade()
-
         glClearColor(0.1, 0.1, 0.1, 1)
-        glClear(GL_COLOR_BUFFER_BIT) #mesmo sendo 2d, é boa prática limpar o buffer 3d
+        glClear(GL_COLOR_BUFFER_BIT)
         glPointSize(11)
         glBegin(GL_POINTS)
 
@@ -171,8 +163,6 @@ def atualizar(valor):
     #essa e a funcao responsavel pelo loop, daqui a X milissegundos usa a mesma funcao denovo
     glutTimerFunc(velocidade_animacao, atualizar, 0)
 
-
-
 #funcao chamada quando uma tecla eh pressionada
 def pressed_key(key, x, y):
     teclas_ativadas.add(key)
@@ -180,7 +170,6 @@ def pressed_key(key, x, y):
 #funcao chamada quando uma tecla eh solta
 def unpressed_key(key, x, y):
     teclas_ativadas.discard(key)
-
 
 def main():
 
@@ -207,7 +196,6 @@ def main():
         }
         dados_globais.append(novo_ponto)
 
-
     if dados_globais:
         max_frames = max(len(p['trajetoria']) for p in dados_globais)
     
@@ -229,7 +217,6 @@ def main():
     print("Janela glut criada")
 
     glutMainLoop()
-
 
 if __name__ == "__main__":
     main()
